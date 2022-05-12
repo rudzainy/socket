@@ -3,18 +3,18 @@ require 'socket'
 PORT = 3000
 
 def handle_connection(client_connection)
-    puts "New client socket connected at #{client_connection}"
+    puts "| #{Time.now.ctime} | New client socket connected at #{client_connection}"
 
-    client_connection.puts("This is a message from the server. ")
+    client_connection.puts("| #{Time.now.ctime} | This is a message from the server. ")
     client_connection.puts("Done sending data to client. ")
-    client_connection.puts("Closing the connection with #{client_connection}. ")
+    client_connection.puts("| #{Time.now.ctime} | Closing the connection with #{client_connection}. ")
     client_connection.close
 
 
-    puts("Closing the connection with #{client_connection} ")
+    puts("| #{Time.now.ctime} | Closing the connection with #{client_connection} ")
 end
 
-print "Starting the server."
+print "| #{Time.now.ctime} | Starting the server."
 
 server = TCPServer.open(PORT)
 print "."
