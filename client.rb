@@ -3,14 +3,31 @@ require 'socket'
 HOST = 'localhost'
 PORT = 3000
 
-print "Connecting to server.."
-server_socket = TCPSocket.open(HOST, PORT)
-puts ". Done!"
+class Client 
+  def initialize(socket_host, socket_port)
 
-while message = server_socket.gets
-    puts message.chomp
+    print "Connecting to server.."
+    @server_socket = TCPSocket.open(socket_host, socket_port)
+    puts ". Done!"
+
+    run
+  end
+
+  def run        
+    while message = @server_socket.gets
+        puts message.chomp
+    end
+
+    close
+  end
+
+  def close
+    
+    puts "Closing the connection..."
+    
+    @server_socket.close
+
+  end
 end
 
-puts "Closing the connection..."
-
-server_socket.close
+Client.new(HOST, PORT)
