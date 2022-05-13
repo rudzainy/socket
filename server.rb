@@ -11,6 +11,11 @@ class Server
     @server_socket = TCPServer.open(PORT)
     print "."
 
+    @connections_details = Hash.new
+    @connected_clients = Hash.new
+
+    @connections_details[:server] = @server_socket
+    @connections_details[:clients] = @connected_clients
 
     puts ". done!\n\nListening on port #{PORT}. Press CTRL+C to cancel... "
     run
@@ -34,21 +39,46 @@ class Server
     #   else puts "Selection error"
     # end
     
-client_connection.puts("| #{Time.now.ctime} | Closing the connection with #{client_connection}. ")
-      puts("| #{Time.now.ctime} | Closing the connection with #{client_connection} ")
-      client_connection.close
+# client_connection.puts("| #{Time.now.ctime} | Closing the connection with #{client_connection}. ")
+#       puts("| #{Time.now.ctime} | Closing the connection with #{client_connection} ")
+#       client_connection.close
     
-
+    establish_chatting(client_username, client_connection)
 
 
   end
+
+  def establish_chatting(username, connection)
+    loop do
+      message = connection.gets.chomp
+      puts @connections_details[:clients]
+      (@connections_details[:clients]).keys.each do |client|
+        @connections_details[:clients][client].puts "#{username} : #{message}"
+      end
+    end
+  end
   
   def run
-    loop do
+    loop {
       new_client_connection = @server_socket.accept
-  puts " ============="
-      Thread.start { handle_connection(new_client_connection) }
-    end
+      
+      # Thread.start { handle_connection(new_client_connection) }
+      Thread.start(new_client_connection) do |client_connection|
+        client_username = client_connection.gets.chomp.to_sym
+
+        if(@connections_details[:clients][client_username] != nil)
+          client_connection.puts "This username is already taken"
+          client_connection.puts "quit"
+          client_connection.kill self
+        end
+
+        puts "Connection established #{client_username} => #{client_connection}" 
+        @connections_details[:clients][client_username] = client_connection
+        client_connection.puts "Connected to server as #{client_username}. You may continue chatting"
+
+        establish_chatting(client_username, client_connection)
+      end
+    }.join
   end
 
   def close

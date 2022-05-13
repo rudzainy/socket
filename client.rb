@@ -10,23 +10,44 @@ class Client
     @server_socket = TCPSocket.open(socket_host, socket_port)
     puts ". Done!"
 
-    while message = @server_socket.gets
-        puts message.chomp
-    end
+    @request_object = send_request
+    @response_object = listen_response
 
-    run
+    @request_object.join
+    @response_object.join
+    # while message = @server_socket.gets
+    #     puts message.chomp
+    # end
+
+    # run
   end
 
-  def run
+  def send_request
     
     # handle usernames
     puts "Enter your username"
     print "> "
+    begin
+      Thread.new do
+        loop do
+          response = $stdin.gets.chomp
+          @server_socket.puts response
+        end
+      end
+    end
 
-    response = $stdin.gets.chomp
-    @server_socket.puts response
+    # close
+  end
 
-    close
+  def listen_response
+    begin
+      Thread.new do
+        loop do
+          response = @server_socket.gets.chomp
+          puts "#{response}"
+        end
+      end
+    end
   end
 
   def close
